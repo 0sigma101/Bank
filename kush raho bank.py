@@ -98,6 +98,7 @@ def create():
 
   
 def login():#this is login function this is one of the option as the program runs
+    global datediff
     global ac_no
     global pin
     ac_no=input('Enter your account number')
