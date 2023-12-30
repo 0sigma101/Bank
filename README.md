@@ -63,6 +63,6 @@ We welcome contributions from the community to make SeamlessBank even better. If
 
 ## Contact
 
-If you have any questions or need assistance, please reach out to our team at support@seamlessbank.com.
+If you have any questions or need assistance, please reach out to our team at pallavgupta.kumarans@gmail.com
 
 SeamlessBank - Banking made easy for everyone!
