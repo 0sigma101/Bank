@@ -101,6 +101,7 @@ class Customer(models.Model):
     lname = models.CharField(max_length=30, blank=True, null=True)
     city = models.CharField(max_length=15, blank=True, null=True)
     mobileno = models.CharField(max_length=10, blank=True, null=True)
+    email = models.CharField(max_length=30, blank=True, null=True, default='')
     dob = models.DateField(blank=True, null=True)
     code = models.IntegerField(blank=True, null=True)
 
