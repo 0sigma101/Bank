@@ -7,5 +7,12 @@
 </head>
 <body>
     <h1>This should give login page</h1>
+    
+    <form method="post" action="{% url 'loginprocess' %}">
+        {% csrf_token %}
+        <input type="text" id="acnumber" name="acnumber" placeholder="Account number" />
+        <input type="password" id="passwd" name="passwd" placeholder="Password" />
+        <button type="submit">Submit</button>
+    </form>
 </body>
 </html>
