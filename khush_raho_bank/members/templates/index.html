@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>Document</title>
 </head>
 <body>
     {% if messages %}
@@ -11,8 +11,7 @@
             <script>alert("{{ message|safe }}");</script>
         {% endfor %}
     {% endif %}
-    <h1>This is login signup page</h1>
-    <button onclick="location.href='loginprocess'">Login</button>
-    <button onclick="location.href='signupprocess'">Signup</button>
+    <h1>{{ message }}</h1>  <!-- Display the welcome message or login prompt -->
+    <button onclick="location.href='/members/'">Login</button>
 </body>
 </html>

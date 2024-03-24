@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up Page</title>
 </head>
+
 <body>
     <h1>Sign Up</h1>
-    
+    <!-- Add JavaScript Alert -->
+    {% if messages %}
+        {% for message in messages %}
+            <script>alert("{{ message|safe }}");</script>
+        {% endfor %}
+    {% endif %}
     <form method="post" action="{% url 'signupprocess' %}">
         {% csrf_token %}
         

@@ -1,8 +1,11 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.template import loader
+from django.contrib.sessions.models import Session
+from django.contrib import messages
 from .models import *
 from datetime import datetime
+from django.utils import timezone
 
 def custid():
     custid = Customer.objects.all().values("custid")[len(Customer.objects.all().values("custid"))-1]['custid']+1
@@ -31,28 +34,68 @@ def loginsignup(request):
     return HttpResponse(template.render(context,request))
     
 def loginprocess(request):
+    # if request.method == "POST":
+    #     acnumber = request.POST['acnumber']
+    #     password = request.POST['passwd']
+    #     try:
+    #         user = Account.objects.get(acnumber=acnumber, pin=password)
+    #         # You can also use Django's built-in authentication
+    #         # from django.contrib.auth import authenticate, login
+    #         # user = authenticate(request, acnumber=acnumber, password=password)
+    #         if user:
+    #             # Login successful, redirect to a success page or homepage
+    #             return HttpResponse("Login Success")
+    #         else:
+    #             # Login failed
+    #             return HttpResponse("Login Failed")
+    #     except AuthUser.DoesNotExist:
+    #         # Login failed
+    #         return HttpResponse("Login Failed")
+    # template = loader.get_template('login.html')
+    # context = {}
+    # return HttpResponse(template.render(context, request))
     if request.method == "POST":
         acnumber = request.POST['acnumber']
         password = request.POST['passwd']
+
         try:
             user = Account.objects.get(acnumber=acnumber, pin=password)
-            # You can also use Django's built-in authentication
-            # from django.contrib.auth import authenticate, login
-            # user = authenticate(request, acnumber=acnumber, password=password)
-            if user:
-                # Login successful, redirect to a success page or homepage
-                return HttpResponse("Login Success")
-            else:
-                # Login failed
-                return HttpResponse("Login Failed")
-        except AuthUser.DoesNotExist:
-            # Login failed
-            return HttpResponse("Login Failed")
+        except Account.DoesNotExist:
+            user = None
+
+        if user is not None:
+            # Manually set session and log user in
+            request.session['acnumber'] = user.acnumber
+            request.session['last_login'] = timezone.now().isoformat()
+            
+            messages.success(request, 'Login Successful!')
+            return redirect('/home/')
+        else:
+            messages.error(request, 'Invalid Credentials!')
+            return redirect('loginprocess')
+
     template = loader.get_template('login.html')
     context = {}
     return HttpResponse(template.render(context, request))
 
 def signupprocess(request):
+    # if request.method == "POST":
+    #     fname = request.POST['fname']
+    #     lname = request.POST['lname']
+    #     city = request.POST['city']
+    #     mobileno = request.POST['mobileno']
+    #     email = request.POST['email']
+    #     dob = request.POST['dob']
+    #     pin = request.POST['pin']
+    #     code = request.POST['code']
+    #     redeem(code)
+    #     Account_data = Account(acnumber = acnum(),custid = custid(),aod = datetime.today(),savings_account = 0,current_account = 0,fixed_deposit = 0,pin = pin)
+    #     Customer_data = Customer(custid = custid(),fname = fname,lname = lname,city = city,mobileno = mobileno,email = email,dob = dob,code = Account_data.acnumber)
+    #     Account_data.save()
+    #     Customer_data.save()
+    # template = loader.get_template('signup.html')
+    # context = {}
+    # return HttpResponse(template.render(context, request))
     if request.method == "POST":
         fname = request.POST['fname']
         lname = request.POST['lname']
@@ -63,10 +106,27 @@ def signupprocess(request):
         pin = request.POST['pin']
         code = request.POST['code']
         redeem(code)
-        Account_data = Account(acnumber = acnum(),custid = custid(),aod = datetime.today(),savings_account = 0,current_account = 0,fixed_deposit = 0,pin = pin)
-        Customer_data = Customer(custid = custid(),fname = fname,lname = lname,city = city,mobileno = mobileno,email = email,dob = dob,code = Account_data.acnumber)
-        Account_data.save()
-        Customer_data.save()
+        
+        account_data = Account(acnumber=acnum(), custid=custid(), aod=datetime.today(), savings_account=0, current_account=0, fixed_deposit=0, pin=pin)
+        customer_data = Customer(custid=custid(), fname=fname, lname=lname, city=city, mobileno=mobileno, email=email, dob=dob, code=account_data.acnumber)
+        
+        account_data.save()
+        customer_data.save()
+
+        try:
+            user = Account.objects.get(acnumber=account_data.acnumber, pin=account_data.pin)
+        except Account.DoesNotExist:
+            user = None
+
+        if user is not None:
+            # Manually set session and log user in
+            request.session['acnumber'] = user.acnumber
+            request.session['last_login'] = timezone.now().isoformat()
+            messages.success(request, 'Signup Successful!')
+            return redirect('/home/')
+        else:
+            messages.error(request, 'Signup Failed!')
+            return redirect('signupprocess')
     template = loader.get_template('signup.html')
     context = {}
     return HttpResponse(template.render(context, request))
