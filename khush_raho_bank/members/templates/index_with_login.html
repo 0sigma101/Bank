@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <script>alert("{{ message|safe }}");</script>
+        {% endfor %}
+    {% endif %}
+    {% for details in message %}
+        <h1>{{ details }}</h1>  <!-- Display the welcome message or login prompt -->
+    {%endfor%}
+    <button onclick="location.href='/members/'">Login</button>
+</body>
+</html>
