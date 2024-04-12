@@ -48,6 +48,8 @@ def loginprocess(request):
             request.session['lname'] = cust.lname
             request.session['city'] = cust.city
             request.session['mobileno'] = cust.mobileno
+            request.session['acnum'] = user.acnumber
+            request.session['pin'] = user.pin
             request.session['last_login'] = timezone.now().isoformat()
             
             messages.success(request, 'Login Successful!')
@@ -84,6 +86,14 @@ def signupprocess(request):
 
         if user is not None:
             # Manually set session and log user in
+            cust = Customer.objects.get(custid = user.custid)
+            request.session['fname'] = cust.fname
+            request.session['lname'] = cust.lname
+            request.session['city'] = cust.city
+            request.session['mobileno'] = cust.mobileno
+            request.session['acnum'] = user.acnumber
+            request.session['pin'] = user.pin
+            request.session['last_login'] = timezone.now().isoformat()
             request.session['user'] = user
             request.session['last_login'] = timezone.now().isoformat()
             messages.success(request, 'Signup Successful!')
@@ -101,4 +111,21 @@ def details(request,id):
     context = {
     'mymember': mymember,
     }
+    return HttpResponse(template.render(context,request))
+
+def chngpswd(request):
+    user = Account.objects.get(acnumber=request.session['acnum'],pin=request.session['pin'])
+    if request.method == "POST":
+        oldpassword = request.POST["oldpass"]
+        newpassword = request.POST['newpass']
+        if(user.pin == int(oldpassword)):
+            user.pin=int(newpassword)
+            user.save()
+            messages.success(request, 'Password!')
+            return redirect('/home/')
+        else:
+            messages.error(request, f'Wrong oldpassword!')
+            return redirect('chngpswd')
+    template = loader.get_template('chngpswd.html')
+    context = {'message': [f'Welcome, {user.pin}'] }
     return HttpResponse(template.render(context,request))
