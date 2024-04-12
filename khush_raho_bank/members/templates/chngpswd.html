@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRB chng password</title>
+</head>
+<body>
+    <h1>Change Password</h1>
+    <!-- Add JavaScript Alert -->
+    {% if messages %}
+        {% for message in messages %}
+            <script>alert("{{ message|safe }}");</script>
+        {% endfor %}
+    {% endif %}
+    {% for details in message %}
+        <h1>{{ details }}</h1>  <!-- Display the welcome message or login prompt -->
+    {%endfor%}
+    <form method="post" action="{% url 'chngpswd' %}">
+        {% csrf_token %}
+        
+        <label for="oldpass">Old Password:</label>
+        <input type="password" id="oldpass" name="oldpass" required><br><br>
+
+        <label for="newpass">New Password:</label>
+        <input type="password" id="newpass" name="newpass" required><br><br>
+
+        <button type="submit">Apply Changes</button>
+    </form>
+</body>
+</html>
