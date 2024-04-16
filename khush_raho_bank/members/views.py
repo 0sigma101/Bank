@@ -20,6 +20,16 @@ def redeem(code):
     person.current_account+=200
     person.save()
 
+def checkbalance(account_number,account_type,amount):
+    user = Account.objects.filter(acnumber=account_number).first()
+    if(account_type == "savings"):
+        if(user.savings_account>(user.loan_account*1.2)/6+amount):
+            return True
+    elif(account_type=="current"):
+        if(user.current_account>(user.loan_account*1.2)/6+amount):
+            return True
+    return False
+
 def members(request):
     mymembers = Account.objects.all().values()
     template = loader.get_template('datashowfilter.html')
@@ -127,5 +137,103 @@ def chngpswd(request):
             messages.error(request, f'Wrong oldpassword!')
             return redirect('chngpswd')
     template = loader.get_template('chngpswd.html')
-    context = {'message': [f'Welcome, {user.pin}'] }
+    context = {'message': [f'Welcome, {request.session["fname"]}'] }
     return HttpResponse(template.render(context,request))
+
+def transact(request):
+    user = Account.objects.get(acnumber=request.session['acnum'],pin=request.session['pin'])
+    if request.method == "POST":
+        print(request)
+        transaction_type = request.POST["transaction_type"]
+        account_type = request.POST['account_type']
+        pin = int(request.POST['pin'])
+        amount = int(request.POST['amount'])
+        if(transaction_type == 'transfer_money'):
+            pin = int(request.POST['transfer_pin'])
+            amount = int(request.POST['transfer_amount'])
+            if(user.pin == pin):
+                recacount = request.POST['recipient_account']
+                recipient = Account.objects.filter(acnumber=recacount).first()
+                if not recipient:
+                    messages.error(request, 'Recipient account does not exist!')
+                    return redirect('/home/')
+                if(account_type == "savings" ):
+                    if(checkbalance(request.session['acnum'],account_type,amount)):
+                        recipient.current_account += amount
+                        user.savings_account -= amount
+                    else:
+                        messages.error(request, 'Low on Balance!')
+                        return redirect('/home/')
+                elif(account_type == "current"):
+                    if(checkbalance(request.session['acnum'],account_type,amount)):
+                        recipient.current_account += amount
+                        user.current_account -= amount
+                    else:
+                        messages.error(request, 'Low on Balance!')
+                        return redirect('/home/')
+                recipient.save()
+                user.save()
+            else:
+                messages.error(request, 'Wrong Password!')
+                return redirect('transact')
+        elif(transaction_type == 'add_money'):
+            pin = int(request.POST['pin'])
+            amount = int(request.POST['amount'])
+            if(user.pin == pin):
+                if(account_type == "savings"):
+                    user.savings_account += amount
+                elif(account_type == "current"):
+                    user.current_account += amount
+                user.save()
+            else:
+                messages.error(request, 'Wrong Password!')
+                return redirect('transact')
+        elif(transaction_type == 'withdraw_money'):
+            pin = int(request.POST['withdraw_pin'])
+            amount = int(request.POST['withdraw_amount'])
+            if(user.pin == pin):
+                if(account_type == "savings"):
+                    if(checkbalance(request.session['acnum'],account_type,amount)):
+                        user.savings_account -= amount
+                    else:
+                        messages.error(request, 'Low on Balance!')
+                        return redirect('/home/')
+                elif(account_type == "current"):
+                    if(checkbalance(request.session['acnum'],account_type,amount)):
+                        user.current_account -= amount
+                    else:
+                        messages.error(request, 'Low on Balance!')
+                        return redirect('/home/')
+                user.save()
+            else:
+                messages.error(request, 'Wrong Password!')
+                return redirect('transact')
+        elif(transaction_type=="self_transfer"):
+            pin = int(request.POST['self_pin'])
+            amount = int(request.POST['self_amount'])
+            if(user.pin == pin):
+                if(account_type == "savings" ):
+                    if(checkbalance(request.session['acnum'],account_type,amount)):
+                        user.savings_account-=amount
+                        user.current_account+=amount
+                    else:
+                        messages.error(request, 'Low on Balance! Some payment yet to be made so please transfer lesser amount')
+                        return redirect('/transact/')
+                elif(account_type == "current" ):
+                    if(checkbalance(request.session['acnum'],account_type,amount)):
+                        user.current_account-=amount
+                        user.savings_account+=amount
+                    else:
+                        messages.error(request, 'Low on Balance! Some payment yet to be made so please transfer lesser amount')
+                        return redirect('/transact/')
+                user.save()
+            else:
+                messages.error(request, 'Wrong Password!')
+                return redirect('transact')
+        messages.success(request, " ".join(transaction_type.split("_"))+' Successful')
+        return redirect('/home/')
+    template = loader.get_template('transact.html')
+    context = {'message': [f'Welcome, {request.session["fname"]}'] }
+    return HttpResponse(template.render(context,request))
+
+
