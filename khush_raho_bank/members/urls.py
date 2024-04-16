@@ -6,5 +6,6 @@ urlpatterns = [
     path('details/<int:id>', views.details, name='details'),
     path('loginprocess', views.loginprocess, name='loginprocess'),
     path('signupprocess', views.signupprocess, name='signupprocess'),
-    path('chngpswd',views.chngpswd,name='chngpswd')
+    path('chngpswd',views.chngpswd,name='chngpswd'),
+    path('transact',views.transact, name='transact')
 ]
