@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transact Page</title>
+</head>
+
+<body>
+    <!-- Add JavaScript Alert -->
+    {% if messages %}
+        {% for message in messages %}
+            <script>alert("{{ message|safe }}");</script>
+        {% endfor %}
+    {% endif %}
+    {% for details in message %}
+        <h1>{{ details }}</h1>  <!-- Display the welcome message or login prompt -->
+    {% endfor%}
+    <form id="transactForm" method="post" action="{% url 'transact' %}">
+        {% csrf_token %}
+
+        <label>Type of Transaction:</label><br>
+        <input type="radio" id="add_money" name="transaction_type" value="add_money">
+        <label for="add_money">Add Money</label><br>
+
+        <input type="radio" id="withdraw_money" name="transaction_type" value="withdraw_money">
+        <label for="withdraw_money">Withdraw Money</label><br>
+
+        <input type="radio" id="transfer_money" name="transaction_type" value="transfer_money">
+        <label for="transfer_money">Transfer Money</label><br>
+
+        <input type="radio" id="self_transfer" name="transaction_type" value="self_transfer">
+        <label for="self_transfer">Self Transfer</label><br><br>
+
+        <label>Type of Account:</label><br>
+        <input type="radio" id="savings" name="account_type" value="savings">
+        <label for="savings">Savings</label><br>
+
+        <input type="radio" id="current" name="account_type" value="current">
+        <label for="current">Current</label><br><br>
+
+        <div id="add_money_fields" style="display: none;">
+            <label for="amount">Amount:</label>
+            <input type="text" id="amount" name="amount"><br><br>
+
+            <label for="pin">Enter Pin:</label>
+            <input type="password" id="pin" name="pin"><br><br>
+        </div>
+
+        <div id="withdraw_money_fields" style="display: none;">
+            <label for="withdraw_amount">Amount to Withdraw:</label>
+            <input type="text" id="withdraw_amount" name="withdraw_amount"><br><br>
+
+            <label for="withdraw_pin">Enter Pin:</label>
+            <input type="password" id="withdraw_pin" name="withdraw_pin"><br><br>
+        </div>
+
+        <div id="transfer_money_fields" style="display: none;">
+            <label for="transfer_amount">Amount to Transfer:</label>
+            <input type="text" id="transfer_amount" name="transfer_amount"><br><br>
+
+            <label for="transfer_pin">Enter Pin:</label>
+            <input type="password" id="transfer_pin" name="transfer_pin"><br><br>
+
+            <label for="recipient_account">Recipient Account Number:</label>
+            <input type="text" id="recipient_account" name="recipient_account"><br><br>
+        </div>
+
+        <div id="self_transfer_fields" style="display: none;">
+            <label for="self_amount">Amount to Transfer:</label>
+            <input type="text" id="self_amount" name="self_amount"><br><br>
+
+            <label for="self_pin">Enter Pin:</label>
+            <input type="password" id="self_pin" name="self_pin"><br><br>
+        </div>
+
+        <button type="button" id="submitButton">Transact</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const transactionTypeRadios = document.querySelectorAll('input[name="transaction_type"]');
+            const addMoneyFields = document.getElementById('add_money_fields');
+            const withdrawMoneyFields = document.getElementById('withdraw_money_fields');
+            const transferMoneyFields = document.getElementById('transfer_money_fields');
+            const selfTransferFields = document.getElementById('self_transfer_fields');
+            const form = document.getElementById('transactForm');
+            const submitButton = document.getElementById('submitButton');
+
+            transactionTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    addMoneyFields.style.display = 'none';
+                    withdrawMoneyFields.style.display = 'none';
+                    transferMoneyFields.style.display = 'none';
+
+                    if (this.value === 'add_money') {
+                        addMoneyFields.style.display = 'block';
+                    } else if (this.value === 'withdraw_money') {
+                        withdrawMoneyFields.style.display = 'block';
+                    } else if (this.value === 'transfer_money') {
+                        transferMoneyFields.style.display = 'block';
+                    } else if (this.value === 'self_transfer') {
+                        selfTransferFields.style.display = 'block';
+                    }
+                });
+            });
+
+            submitButton.addEventListener('click', function() {
+                const transactionType = document.querySelector('input[name="transaction_type"]:checked');
+                const accountType = document.querySelector('input[name="account_type"]:checked');
+                const amount = document.getElementById('amount');
+                const pin = document.getElementById('pin');
+                const withdrawAmount = document.getElementById('withdraw_amount');
+                const withdrawPin = document.getElementById('withdraw_pin');
+                const transferAmount = document.getElementById('transfer_amount');
+                const transferPin = document.getElementById('transfer_pin');
+                const recipientAccount = document.getElementById('recipient_account');
+                const selfAmount = document.getElementById('self_amount');
+                const selfPin = document.getElementById('self_pin');
+                if (
+                    (transactionType.value === 'add_money' && accountType && amount && pin) ||
+                    (transactionType.value === 'withdraw_money' && accountType && withdrawAmount && withdrawPin) ||
+                    (transactionType.value === 'transfer_money' && accountType && transferAmount && transferPin && recipientAccount) ||
+                    (transactionType.value === 'self_transfer' && accountType && selfAmount && selfPin)
+                ) {
+                    form.submit();
+                } else {
+                    alert('Please fill out all required fields!');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
